@@ -1,1 +1,140 @@
-<h1>You said {{ hello }}</h1>
+
+
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<!-- Page Title Section -->
+<div id="title" class="container">
+
+    <div class="row justify-content-sm-center">
+        <div class="col col-sm-12 text-center">
+            <h1>Demo application</h1>
+        </div>
+    </div>
+
+</div>
+
+<div class="container">
+    
+
+    <!-- Chart Section -->
+    <div id="chart" class="row">    
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- Average Rates Section -->
+    <div id="average" class="row justify-content-sm-center">
+        <div class="col col-sm-12 text-center">
+            <h2>Notes moyennes</h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-sm-center">
+        {% for site in sites %}
+            <div class="col col-sm-4 text-center">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-text">Moyenne</p>
+                        <h5 class="card-title">{{ site.name }}</h5>
+                        <p class="card-text">{{ site.average }} / 10</p>
+                        <p class="card-text">du {{ dates|first|date("d/m/Y") }} au {{ dates|last|date("d/m/Y") }}</p>
+                    </div>
+                </div>
+                
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+
+    // Formatting dates array to be displayed as X Axis
+    let dates = [];
+    '{% for date in dates %}'
+
+        dates.push('{{ date|date("d/m/Y") }}');
+
+    '{% endfor %}'
+
+    // Datasets do be displayed
+    let datasets = [];
+
+    let sites = [];
+    let name = '';
+    let color = '';
+    let rates = [];
+    let dataset = {};
+    '{% for site in sites %}'
+
+        // Create a random color for the chart dataset 
+        color = 'rgba('+Math.floor((Math.random() * 255) + 1)+','+Math.floor((Math.random() * 255) + 1)+','+Math.floor((Math.random() * 255) + 1)+',1)';
+        // fill rates array with rates 
+        rates = [];
+        '{% for rate in site.rates %}'
+            rates.push('{{ rate }}');
+        '{% endfor %}'
+        // Set the dataset object
+        dataset = {
+            label: '{{site.name}}',
+            data: rates,
+            backgroundColor: color,
+            borderColor: color,
+            borderWidth: 2,
+            cubicInterpolationMode: 'monotone',
+            fill: false
+        };
+        // Push dataset object to datasets array
+        datasets.push(dataset);
+
+
+
+    '{% endfor %}'
+
+    
+    
+    // Array iteration to obtain the data and format each dataset
+    sites.forEach(site=>{
+        let color = 'rgba('+Math.floor((Math.random() * 255) + 1)+','+Math.floor((Math.random() * 255) + 1)+','+Math.floor((Math.random() * 255) + 1)+',1)'; 
+        let dataset = {
+            label: site.name,
+            data: site.rates,
+            backgroundColor: color,
+            borderColor: color,
+            borderWidth: 2,
+            cubicInterpolationMode: 'monotone',
+            fill: false
+        };
+        datasets.push(dataset);
+    });
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            title: {
+                display:true,
+                text: 'Evolution des notes jour par jour'
+            },
+            tooltips: {
+                mode: 'index',
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: 5,
+                        suggestedMax:11
+                    }
+                }]
+            }
+        }
+    });
+</script>
+
+{% endblock %}
