@@ -57,9 +57,11 @@ class HomeController extends AbstractController
         foreach($rates as $site)
         {
             $name = $site['name'];
-            $rates[$name]['average'] = round($helpers->average($site['rates']),2);
-            $rates[$name]['stars'] = round($rates[$name]['average']/2);
-            $rates[$name]['halfstar'] = round($rates[$name]['average'])%2 == 1 ? true : false;
+            // If average function returns a number, use it, default to 0
+            $average = $helpers->average($site['rates']) ? $helpers->average($site['rates']) : 0;
+            $rates[$name]['average'] = round($average,2);
+            $rates[$name]['stars'] = round($average/2);
+            $rates[$name]['halfstar'] = round($average)%2 == 1 ? true : false;
         }
 
         // Return view, passing site's rates array and dates array
