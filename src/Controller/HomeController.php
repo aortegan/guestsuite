@@ -15,72 +15,56 @@ class HomeController extends AbstractController
         // Get helper functions
         $helpers = new Helpers();
 
-        // Get json data
+        // Get json mock data from file
         $fileData = file_get_contents('./../src/data/mockdata.json');
-        $rates = json_decode($fileData, true);
+        $data = json_decode($fileData, true);
 
         /*
          * Objects to return 
          * 
-         * array of average rates and site ['Tripadvisor' => '7.1', 'Google' => '6.9']
+         * array of site's rates and average rate
          * array of sites containing days and rates
-         * 
          *
          * */
-
-        $allSitesData = [];
-
-        $chart = [];
+        $rates = [];
         $dates = [];
-        $average = [];
 
-        foreach($rates as $date)
+        // Iterate each day
+        foreach($data as $date)
         {   
-
+            // Iterate each rate of the day
             foreach($date['rates'] as $site => $rate)
             {   
-                if( !array_key_exists($site,$average) )
-                {   
-                    $average[$site] = [$rate]; 
-                }else{
-                    array_push($average[$site],$rate);
-                }
-
-                if( !array_key_exists($site,$allSitesData) )
+                // Initialize the array of the site if it doesn't exist already
+                if( !array_key_exists($site,$rates) )
                 {
-                    $allSitesData[$site] = [];
-                    $allSitesData[$site]['name'] = $site;
-                    $allSitesData[$site]['rates'] = [];
-                    $allSitesData[$site]['average'] = 0.0;
+                    $rates[$site] = [];
+                    $rates[$site]['name'] = $site;
+                    $rates[$site]['rates'] = [];
+                    $rates[$site]['average'] = 0.0;
+                    // For icons display purposes
+                    $rates[$site]['stars'] = 0;
+                    $rates[$site]['halfstar'] = false;
                 }
-
-                array_push($allSitesData[$site]['rates'], $rate); 
+                // Push rate into the site's rates array
+                array_push($rates[$site]['rates'], $rate); 
             }
+            // Push date into dates array
             array_push($dates,$date['date']);
         }
 
-        //var_dump($allSitesData);
-
-        foreach($average as $site => $rates)
-        {
-            $average[$site] = round($helpers->average($rates),2);
-            //var_dump($rates);
-        }
-
-        foreach($allSitesData as $site)
+        // Set the average rate for each site
+        foreach($rates as $site)
         {
             $name = $site['name'];
-            $allSitesData[$name]['average'] = round($helpers->average($site['rates']),2);
-            //$allSitesData[$site['name']]['average'] = round($helpers->average($site['rates']),2);
-            //var_dump($site);
+            $rates[$name]['average'] = round($helpers->average($site['rates']),2);
+            $rates[$name]['stars'] = round($rates[$name]['average']/2);
+            $rates[$name]['halfstar'] = round($rates[$name]['average'])%2 == 1 ? true : false;
         }
-        //var_dump($allSitesData["Guest Suite"]);
 
-        //$average = $helpers->average($values);
-
+        // Return view, passing site's rates array and dates array
         return $this->render('Home/view.html.twig', [
-            'average' => $average,
-            'sites' => $allSitesData,
+            'sites' => $rates,
             'dates' => $dates
         ]);
     }
