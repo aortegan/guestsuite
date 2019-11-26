@@ -69,18 +69,28 @@
 
     '{% endfor %}'
 
+    // Colors object for the chart dataset
+    colors = {
+        'tripadvisor' : '#078171',
+        'guestsuite' : '#da3768',
+        'pagejaunes' : '#ffec00',
+        'yelp' : '#d32323',
+        'booking.com' : '#003580',
+        'zoover' : '#008fc5',
+    }
+
     // Datasets do be displayed
     let datasets = [];
 
     let sites = [];
-    let name = '';
     let color = '';
     let rates = [];
     let dataset = {};
-    '{% for site in sites %}'
+    let sitename = '';
 
-        // Create a random color for the chart dataset 
-        color = 'rgba('+Math.floor((Math.random() * 255) + 1)+','+Math.floor((Math.random() * 255) + 1)+','+Math.floor((Math.random() * 255) + 1)+',1)';
+    '{% for site in sites %}'
+        sitename = '{{site.name|replace({' ':''})|lower}}';
+ 
         // fill rates array with rates 
         rates = [];
         '{% for rate in site.rates %}'
@@ -90,12 +100,13 @@
         dataset = {
             label: '{{site.name}}',
             data: rates,
-            backgroundColor: color,
-            borderColor: color,
+            backgroundColor: colors[sitename],
+            borderColor: colors[sitename],
             borderWidth: 2,
             cubicInterpolationMode: 'monotone',
             fill: false
         };
+        console.log(color.sitename);
         // Push dataset object to datasets array
         datasets.push(dataset);
 
